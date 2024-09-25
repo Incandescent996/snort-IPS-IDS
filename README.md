@@ -22,5 +22,15 @@ Output integration modules (e.g., alerts to syslog/mysql) and additional plugin 
 ## Types of Rules Available for Snort
 
 ### 1. **Community Rules**  
-- Free rules
+- Free ruleset under the GPLv2.  
+- Publicly accessible, no need for registration.
 
+### 2. **Registered Rules**  
+- Free ruleset (requires registration).  
+- Contains subscriber rules with a 30-day delay.
+
+### 3. **Subscriber Rules (Paid)**  
+- Paid ruleset (requires subscription).  
+- Updated twice a week (Tuesdays and Thursdays).
+
+---
