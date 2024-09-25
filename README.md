@@ -34,3 +34,4 @@ Output integration modules (e.g., alerts to syslog/mysql) and additional plugin 
 - Updated twice a week (Tuesdays and Thursdays).
 
 ---
+Information taken from (https://tryhackme.com/r/room/snort)
