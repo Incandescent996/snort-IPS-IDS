@@ -1,0 +1,56 @@
+Here are some technical Snort IPS rules that can be directly applied or customized for your environment. These rules focus on common and high-impact attack types. Note that these rules are illustrative and should be adjusted for your network’s specific needs.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect TCP SYN flood (DDoS) attack
+A TCP SYN flood is a form of denial-of-service attack that consumes resources by sending numerous SYN requests.
+alert tcp any any -> any 80 (flags:S; msg:"Possible SYN Flood"; threshold:type both, track by_src, count 20, seconds 5; sid:1000001; rev:1;)
+This rule triggers if more than 20 SYN packets are seen from a single source in a 5-second window, which is indicative of a SYN flood attack.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect Shellcode execution (exploit attempts)
+Shellcode is commonly used in exploits to execute malicious code.
+alert tcp any any -> any any (msg:"Shellcode Execution Detected"; content:"|90 90 90 90|"; sid:1000002; rev:1;)
+This rule detects a simple NOP sled (a common component of shellcode) by looking for a sequence of 0x90 bytes, which is often used to pad shellcode.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect SQL Injection (SQLi)
+SQL injection attacks target databases through vulnerable web applications.
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS 80 (msg:"SQL Injection attempt"; content:"' or '1'='1"; nocase; sid:1000003; rev:1;)
+This rule detects a basic SQL injection string (' or '1'='1), which is commonly used in attacks targeting login forms.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect DNS Amplification (DDoS)
+DNS amplification is a type of DDoS attack where large DNS responses overwhelm a victim's network.
+alert udp any 53 -> any any (msg:"DNS Amplification Attack"; content:"|c0|"; dsize: >512; sid:1000004; rev:1;)
+This rule looks for unusually large DNS responses (greater than 512 bytes), which can be indicative of DNS amplification attacks.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect Cross-Site Scripting (XSS)
+Cross-site scripting is a web-based attack where an attacker injects malicious scripts into a website.
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS 80 (msg:"XSS Attack Detected"; content:"<script>"; nocase; sid:1000005; rev:1;)
+This rule detects HTTP traffic that contains the <script> tag, which is a common indicator of an XSS attack.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect unauthorized access to sensitive files
+This rule detects attempts to access .htpasswd files, which can be used to store user credentials for web applications.
+alert tcp any any -> $HTTP_SERVERS 80 (msg:"Attempt to access .htpasswd"; uricontent:".htpasswd"; nocase; sid:1000007; rev:1;)
+This rule triggers if a request is made to access .htpasswd files on a web server, which could indicate an attempt to steal credentials.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect SMB exploitation attempts
+This rule detects attempts to exploit vulnerabilities in the SMB protocol, such as EternalBlue.
+alert tcp any any -> $HOME_NET 445 (msg:"SMB Exploit Detected - EternalBlue"; content:"|FF 53 4D 42|"; offset:4; depth:4; sid:1000008; rev:1;)
+This rule looks for the SMB protocol's magic header 0xFF 0x53 0x4D 0x42, which can indicate exploitation attempts against SMB services, like the EternalBlue exploit.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CVE-2021-44228 (Log4j - Log4Shell) Detection
+After the disclosure of the Log4j vulnerability, Talos released rules to detect attempts to exploit it.
+alert tcp any any -> $HTTP_SERVERS any (msg:"Log4j Exploit Attempt Detected"; content:"jndi:ldap"; sid:1000001; rev:1;)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect Command and Control (C2) traffic
+C2 traffic is used by attackers to control compromised systems.
+alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"C2 Traffic Detected"; content:"POST /update"; http_method; sid:1000009; rev:1;)
+This rule looks for outbound HTTP POST requests to /update, which could be indicative of malware contacting its command and control server.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rule to detect HTTP GET request for a specific malicious URL
+This rule detects requests to known malicious URLs.
+alert tcp any any -> any 80 (msg:"Known Malicious URL Access"; uricontent:"/malicious"; sid:1000010; rev:1;)
+This rule monitors for HTTP GET requests to a known malicious URL (/malicious), which could be part of an attack or malware communication.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Tips for Deployment:
+Test the Rules in IDS Mode First: Before deploying these rules in inline mode (where traffic can be blocked), it’s a good practice to first monitor them in IDS mode to ensure they don’t generate excessive false positives.
+Customize the $HOME_NET and $EXTERNAL_NET Variables: These variables should be configured according to your network. $HOME_NET typically refers to your internal network, while $EXTERNAL_NET refers to any external networks.
+Review and Tweak Thresholds: For rules involving thresholds (such as brute-force detection), adjust the parameters (count and seconds) to fit the activity levels you expect in your environment.
