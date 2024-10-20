@@ -1,4 +1,4 @@
-# snort-training
+# snort 
 
 # Main Components of Snort
 
